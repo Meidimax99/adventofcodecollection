@@ -6,7 +6,7 @@ INPUT := ../input.txt
 all: build run clean 
 
 run: $(TARGET)
-	@cat $(INPUT) | ./$(TARGET) 
+	@cat $(INPUT) | ./$(TARGET)
 
 build: $(TARGET).c
 	@$(CC) $(TARGET).c -o $(TARGET)
