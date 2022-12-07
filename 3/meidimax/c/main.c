@@ -111,7 +111,7 @@ void printRucksack(UnorderedRuckSack rucksack)
     printArray(rucksack->secondCompartment, ITEM_NUM + 1);
 }
 
-// overmodelled approach
+// overmodelled approach Task1
 int main1(int argc, char *argv)
 {
     char buffer[128];
@@ -146,8 +146,8 @@ int getCommonItemPriority(char *str)
     }
     return 0;
 }
-// naive approach
-int main(int argc, char *argv)
+// naive approach Task1
+int main2(int argc, char *argv)
 {
     char buffer[128];
     int prioritySum = 0;
@@ -155,6 +155,43 @@ int main(int argc, char *argv)
     {
         fgets(buffer, 128, stdin);
         prioritySum += getCommonItemPriority(buffer);
+    }
+    printf("The sum of priorities is %d\n", prioritySum);
+    return 0;
+}
+
+void addItemsToCompartement(int *compartment, char *str) {
+    for(int i = 0; i < strlen(str)-1; i++) {
+        addItemToCompartment(compartment, str[i]);
+    }
+}
+int getGroupTagPriority(char *str1, char *str2, char *str3) {
+    int *items[3];
+    items[0] = makeItemCompartment();
+    items[1] = makeItemCompartment();
+    items[2] = makeItemCompartment();
+    addItemsToCompartement(items[0], str1);
+    addItemsToCompartement(items[1], str2);
+    addItemsToCompartement(items[2], str3);
+    for(int i = 1; i < ITEM_NUM+1; i++) {
+        if(items[0][i] > 0 && items[1][i] > 0 && items[2][i] > 0 ) {
+            return i;
+        }
+    }
+    return 0;
+}
+// Task2
+int main(int argc, char *argv)
+{
+    char buffer[3][128];
+    int prioritySum = 0;
+    while (!feof(stdin))
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            fgets(buffer[i], 128, stdin);
+        }
+        prioritySum += getGroupTagPriority(buffer[0], buffer[1], buffer[2]);
     }
     printf("The sum of priorities is %d\n", prioritySum);
     return 0;
