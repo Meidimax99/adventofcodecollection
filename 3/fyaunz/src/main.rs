@@ -4,6 +4,7 @@ use std::path::Path;
 
 fn main() {
     part1();
+    part2();
 }
 
 fn match_char(char: &str) -> i32 {
@@ -54,6 +55,9 @@ fn char_to_priority(char: &str) -> i32 {
     let char = char.to_ascii_uppercase();
     let char = char.as_str();
 
+    // let char = char.to_ascii_uppercase().as_bytes();
+    // let char = char[0] as u8;
+
     prio += match_char(char);
     return prio;
 }
@@ -70,6 +74,30 @@ fn get_prop(line: String) -> i32 {
     return 0;
 }
 
+fn get_match(elves: &Vec<String>) -> i32 {
+    let mut sum = 0;
+    'outer: for x in 0..elves[0].len() {
+        for y in 0..elves[1].len() {
+            if elves[0][x..x + 1] == elves[1][y..y + 1] {
+                sum += match_third(&elves[0][x..x + 1], &elves);
+                if sum != 0 {
+                    break 'outer;
+                }
+            }
+        }
+    }
+    return sum;
+}
+
+fn match_third(char: &str, elves: &Vec<String>) -> i32 {
+    for i in 0..elves[2].len() {
+        if char == &elves[2][i..i + 1] {
+            return char_to_priority(char);
+        }
+    }
+    return 0;
+}
+
 fn part1() {
     let mut sum = 0;
 
@@ -81,4 +109,24 @@ fn part1() {
         }
     }
     println!("Sum: {}", sum);
+}
+
+fn part2() {
+    let mut sum = 0;
+    let mut elves: Vec<String> = Vec::new();
+    let mut group = 0;
+    if let Ok(lines) = read_lines("input.txt") {
+        for line in lines {
+            if let Ok(line) = line {
+                elves.push(line);
+                group += 1;
+            }
+            if group == 3 {
+                sum += get_match(&elves);
+                elves.clear();
+                group = 0;
+            }
+        }
+    }
+    println!("Sum2: {}", sum);
 }
