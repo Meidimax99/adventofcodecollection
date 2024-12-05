@@ -52,7 +52,23 @@ fn main() {
         diff = row1[i].abs_diff(row2[i]);
         sum += diff;
     }
-    print!("Result: {}\n",sum);
+    print!("Distance: {}\n",sum);
 
+    let mut similarity = 0;
+    let mut index2 = 0;
+    for i in 0..row1.len() {
+        let num1 = row1[i];
+        while row2[index2] < num1 {
+            index2 += 1;
+        }
+        let mut count = 0;
+        while row2[index2] == num1 {
+            index2 += 1;
+            count += 1;
+        }
+        similarity += count * num1;
+    }
+
+    print!("Similarity: {}\n", similarity);
 
 }
