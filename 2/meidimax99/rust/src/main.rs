@@ -100,58 +100,14 @@ fn is_problem(diff: usize, gradient: &Gradient, previous_gradient: &Gradient) ->
 }
 
 fn is_safe_report_dampener(report: &Vec<usize>) -> bool{
-    let mut prev_comp = -1;
-    let mut comparator = -1;
-    let mut active: i32;
-    let mut available_skips = 1;
-
-    let mut prev_gradient = Gradient::FirstIter;
-    //TODO Special case for last?
-    let mut i: usize = 0;
-    let end: usize = report.len();
-    loop{
-
-        active = i as i32;
-        let (gradient, diff) = get_gradient(&report, comparator, active);
-        if gradient == Gradient::FirstIter {
-            prev_comp = comparator;
-            comparator = active;
-        } else {
-            
-            let problem = is_problem(diff as usize, &gradient, &prev_gradient);
-
-            if problem && available_skips > 0 {
-                available_skips -= 1;
-
-                //TODO Either change Comparator to previous one (previous level is the problem)
-                //  Or leave comparator as is and go to next iteration (active level is the problem)
-                if gradient == Gradient::FirstIter {
-                    comparator = prev_comp;
-                    continue;
-                }
-            } else if problem {
-                //Skip a first wrong element
-                if comparator == 0 {
-                    comparator = 1;
-                    continue;
-                }
-                return false;
-            } else {
-                prev_comp = comparator;
-                comparator = active;
-                prev_gradient = gradient;
-            }
-        }
-
-
-        //Loop stuff
-        i += 1;
-        if i == end {
-            break;
+    for i in 0..report.len() {
+        let mut rep_copy = report.clone();
+        rep_copy.remove(i);
+        if is_safe_report(&rep_copy) {
+            return true;
         }
     }
-
-    return true;
+    return false;
 }
 
 fn main() {
@@ -176,12 +132,10 @@ fn main() {
 
     let mut sum_safe_reports_dampener = 0;
     for report in &input {
-        if is_safe_report_dampener(&report) {
+        if is_safe_report_dampener(&report) {   
             sum_safe_reports_dampener += 1;
-            println!("---");
 
         } else {
-            println!("{:?}", report);
         }
     }
     print!("Number of safe reports with the Problem Dampener: {}\n", sum_safe_reports_dampener)
