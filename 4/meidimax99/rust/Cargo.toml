@@ -1,0 +1,9 @@
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+regex = "1.9.5"
+strum = "0.24"
+strum_macros = "0.24"
