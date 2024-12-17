@@ -1,9 +1,13 @@
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, Read};
-use std::usize;
+use std::{usize, vec};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+
+use std::sync::Arc;
+
+use std::thread;
 
 
 fn get_number(string: &str) -> usize {
@@ -15,10 +19,12 @@ fn get_number(string: &str) -> usize {
     num.parse::<usize>().unwrap_or(0)
 }
 
-fn parse_input(contents: &String) -> Result<(Regs, Vec<Instr>), String> {
+fn parse_input(contents: &String) -> Result<(Regs, Vec<Instr>, Vec<usize>), String> {
     
     let mut regs = Regs {a:0 ,b:0, c:0};
     let mut instructions: Vec<Instr> = vec![];
+
+    let mut original_program: Vec<usize> = vec![];
 
     let mut lines = contents.lines();
 
@@ -40,9 +46,11 @@ fn parse_input(contents: &String) -> Result<(Regs, Vec<Instr>), String> {
     let mut nums_iter = nums.into_iter();
     let mut elem = nums_iter.next().unwrap();
     loop {
+        original_program.push(elem as usize);
         let mut instr = Instr{opcode: OpCode::Adv, operant: 0};
         instr.opcode = OpCode::from_u8(elem).unwrap();
         instr.operant = nums_iter.next().unwrap();
+        original_program.push(instr.operant as usize);
         let next = nums_iter.next();
         instructions.push(instr);
         if next.is_some() {
@@ -52,7 +60,7 @@ fn parse_input(contents: &String) -> Result<(Regs, Vec<Instr>), String> {
         }
 
     }
-    return Ok((regs, instructions));
+    return Ok((regs, instructions, original_program));
 }
 
 fn read_file(path: &String) -> Result<String, String> {
@@ -89,7 +97,7 @@ enum OpCode {
 
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 struct Regs {
     a: usize,
     b: usize,
@@ -172,33 +180,87 @@ impl Instr {
     }
 }
 
-fn run(regs: &mut Regs, instructions: Vec<Instr>) {
+fn run(regs: &mut Regs, instructions: &Vec<Instr>) -> Vec<usize> {
     let mut pc = 0;
+    let mut res: Vec<usize> = vec![];
+
 
     loop {
         let  next_instr: &Instr = &instructions[pc];
     
         let opt = next_instr.execute(regs, &mut pc);
-        //println!("-:{}:-",pc);
         let output = opt.is_some();
         if output {
-            print!("{}",opt.unwrap());
+            //print!("{}",opt.unwrap());
+            res.push(opt.unwrap());
         }
         if pc >= instructions.len() {
             break;
         }
-        if output {
-            print!(",");
+        // if output {
+        //     print!(",");
+        // }
+    }
+    return res;
+}
+
+fn vec_equ(a: &Vec<usize>, b: &Vec<usize>) -> bool {
+    //println!("A: {:?}\nB: {:?}", a, b);
+    //let a = vec![2, 4, 1, 3, 7, 5, 0, 3, 4, 3, 1, 5, 5, 5, 3, 0];
+    if a.len() != b.len() {
+        return false;
+    }
+    for i in 0..a.len() {
+        if a[i] != b[i] {
+            return false;
         }
+    }
+    return true;
+} 
+
+fn run_thread(regs: Arc<Regs>, instructions: Arc<Vec<Instr>>, start: usize, n_threads: usize, original_prog: Arc<Vec<usize>>) {
+    let mut a = start;
+
+    loop {
+        let mut regs_copy = (*regs).clone();
+        regs_copy.a = a;
+        //println!("Trying {}",a);
+        let res = run(&mut regs_copy, &*instructions);
+        if vec_equ(&res, &*original_prog) {
+            println!("{} - {:?}", a, res);
+            break;
+        }
+        a += n_threads;
     }
 }
 fn main() {
 
     let path = String::from("input.txt");
 
-    let (mut regs, instructions) = parse_input(&read_file(&path).unwrap()).unwrap();
+    let ( regs, instructions, original_prog) = parse_input(&read_file(&path).unwrap()).unwrap();
 
-    run(&mut regs, instructions);
+    let mut handles = vec![];
+    let n_threads = 8;
+
+    let shared_regs = Arc::new(regs);
+    let shared_instr = Arc::new(instructions);
+    let shared_org = Arc::new(original_prog);
+
+    for i in 0..=n_threads {
+
+        let shared_regs_clone = Arc::clone(&shared_regs);
+        let shared_instr_clone = Arc::clone(&shared_instr);
+        let shared_org_clone = Arc::clone(&shared_org);
+
+        let handle = thread::spawn(move || {
+            run_thread(shared_regs_clone, shared_instr_clone, i, n_threads, shared_org_clone);
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().expect("Thread failed to join");
+    }
 
     println!()
 
