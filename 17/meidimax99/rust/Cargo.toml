@@ -1,0 +1,8 @@
+[package]
+name = "rust"
+version = "1.83.0"
+edition = "2021"
+
+[dependencies]
+num-derive = "0.4"
+num-traits = "0.2"
