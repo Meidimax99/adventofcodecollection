@@ -246,15 +246,41 @@ fn find_patterns() -> HashMap<usize, Vec<u16>> {
     return map;
 }
 
+//find the next index from the patterns vector that fits the prefix found in the 
+fn find_fitting_pattern(index: usize, patterns: &Vec<u16>, vec: &mut BitVec<u8>, prefix_len: usize) -> Result<usize,()> {
+    let mut pat_idx: usize = 0;
+
+    Ok(pat_idx)
+}
+
+//Tries to insert a pattern from the patterns vector at the bits BitVector.
+//The pattern will be inserted starting at index
+//This may not be at the end of the bitvector and there may be some bits already at this index
+//The pattern picked from the patterns vector needs to fit this prefix that is already present in the bits Vector at the given index
+//The patterns_start_index parameter lets the caller choose a starting index for finding a pattern (this is used for backtracking)
+//Returns the index into the patterns vector that has been used for the pattern
+fn insert_pattern(index: usize, patterns: &Vec<u16>, bits: &mut BitVec<u8>, patterns_start_index: usize) -> Result<usize, ()>{
+
+    Ok((0)) //TODO Change to the actual used pat idx
+}
 
 fn find_a(patterns: HashMap<usize, Vec<u16>>, desired_output: &Vec<usize>) -> u128 {
     let mut bitvec = bitvec![u8, Lsb0;];
+    let mut insert_index = 0;
+    let mut prev_iteration_pat_idx = 0; //Todo need higher backtrack depth?
     for ele in desired_output {
-        let no_bits = usize::BITS - ele.leading_zeros();
-        bitvec.extend_from_bitslice(&ele.view_bits::<Lsb0>()[0..no_bits as usize]);
-        println!("BitVec after appending {} ({:b}): {}",ele, ele, bitvec.load_le::<u128>());
+
+        insert_pattern(insert_index, &patterns[ele], &mut bitvec, 0); //TODO give variable instead of 0, how to repeate prev iteration?
+
+        // println!("{}",*ele);
+        // let ele = patterns.get(ele).unwrap()[0];
+        // let no_bits = u16::BITS - ele.leading_zeros();
+        // let no_bits =  no_bits.max(3) as usize;
+        // bitvec.extend_from_bitslice(&ele.view_bits::<Lsb0>()[0..no_bits]);
+        // println!("BitVec after appending {} ({:b}): {:?}",ele, ele, bitvec);
+        insert_index += 3;
     }
-    return 1;
+    return bitvec.load_le::<u128>();
 }
 
 
