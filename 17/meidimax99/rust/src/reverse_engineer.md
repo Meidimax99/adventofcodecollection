@@ -47,3 +47,6 @@ LSB -> MSB
 Map desired number -> Possible bitpatterns
 Overlapping bit patterns with size 3-10 bits
 
+
+10      2
+10010   18

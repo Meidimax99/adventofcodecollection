@@ -6,7 +6,7 @@ use std::io::{BufReader, Read};
 use std::usize;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-use bitpatterns::*;
+use bitvec::prelude::*;
 
 
 fn get_number(string: &str) -> usize {
@@ -247,14 +247,24 @@ fn find_patterns() -> HashMap<usize, Vec<u16>> {
 }
 
 
+fn find_a(patterns: HashMap<usize, Vec<u16>>, desired_output: &Vec<usize>) -> u128 {
+    let mut bitvec = bitvec![u8, Lsb0;];
+    for ele in desired_output {
+        let no_bits = usize::BITS - ele.leading_zeros();
+        bitvec.extend_from_bitslice(&ele.view_bits::<Lsb0>()[0..no_bits as usize]);
+        println!("BitVec after appending {} ({:b}): {}",ele, ele, bitvec.load_le::<u128>());
+    }
+    return 1;
+}
 
 
 
 
 
-fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) -> Option<usize> {
+fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) -> Option<u128> {
    
    
+   //Todo Create formula from instruciton autoatically
     
     let patterns = find_patterns();
     // for (b, a) in patterns {
@@ -263,6 +273,8 @@ fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) 
     //         println!("{:b}", ele)
     //     }
     // }
+
+    return Some(find_a(patterns, desired_output));
 
    
     // //Assumption: Only one Print Statement
