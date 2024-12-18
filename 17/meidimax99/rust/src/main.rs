@@ -250,9 +250,12 @@ fn pattern_len(pat: u16) -> usize {
     ( u16::BITS - pat.leading_zeros() ) as usize
 }
 
-fn has_overlap(pat: u16, width: usize) -> (bool, usize) {
+fn has_overlap(pat: u16, width: usize) -> Option<usize> {
     let len = pattern_len(pat);
-    (  len > width, len)
+    if len > width {
+        return Some(len-width);
+    }
+    None
 }
 
 
@@ -261,6 +264,7 @@ fn find_a(patterns: HashMap<usize, Vec<u16>>, desired_output: &Vec<usize>) -> u1
     // array of indexes into the patterns array that have been choosen 
     // The index into this array corresponds to the index into the desired output array and thus identifies the desired output
     let mut indexes: Vec<usize> = vec![0; desired_output.len()]; 
+    let mut overflow: Vec<Option<usize>> = vec![None; desired_output.len()]; 
 
     let mut index: usize = 0;
     loop {
@@ -269,10 +273,16 @@ fn find_a(patterns: HashMap<usize, Vec<u16>>, desired_output: &Vec<usize>) -> u1
 
         let pat = patterns[indexes[index]];
 
-        let ( overlap, _ ) = has_overlap(pat, 3);
-        if overlap {
-            println!("Pattern for {} too big {:b}",desired_output_value, pat );
+        let overlap= has_overlap(pat, 3);
+        if overlap.is_some() {
+            let flap = pat as usize % (2 as usize).pow(overlap.unwrap() as u32);
+            overflow[index] = Some(flap);
+            println!("{:b} overlaps with {}", pat, flap)
         }
+
+        //TODO next: increase pattern counter and try next pattern
+
+        //Also: Backtrace
 
 
 
@@ -301,7 +311,7 @@ fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) 
    //Todo Create formula from instruciton autoatically
     
     let patterns = find_patterns();
-    // for (b, a) in patterns {
+    // for (b, a) in &patterns {
     //     println!("\n\n{}:",b);
     //     for ele in a {
     //         println!("{:b}", ele)
