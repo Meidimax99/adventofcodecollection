@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 num-derive = "0.4"
 num-traits = "0.2"
+bitpatterns = "0.1.1"

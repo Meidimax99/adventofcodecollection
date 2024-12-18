@@ -9,6 +9,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
+name = "bitpatterns"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d4cb1ea1c68957c35ab181f6547b81d2e1fbe9eddec303d86fa90c58344a15b"
+dependencies = [
+ "bitpatterns-proc-macro",
+]
+
+[[package]]
+name = "bitpatterns-proc-macro"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f5580af0449699099fd22566bb298f946535a64c75dc89344c844b24b18588a"
+
+[[package]]
 name = "num-derive"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -50,6 +65,7 @@ dependencies = [
 name = "rust"
 version = "1.83.0"
 dependencies = [
+ "bitpatterns",
  "num-derive",
  "num-traits",
 ]

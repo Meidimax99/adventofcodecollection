@@ -1,9 +1,12 @@
+use std::collections::HashMap;
+use std::iter::Map;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::usize;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use bitpatterns::*;
 
 
 fn get_number(string: &str) -> usize {
@@ -222,7 +225,46 @@ fn find_instr(instructions: &Vec<Instr>, instr_type: OpCode) -> Vec<u8> {
     return instr_idx;
 }
 
+//================================================ Part 2 =========================================================
+
+fn calculate(a: u16 ) -> u16 {
+    (( ( (a % 8) ^ 3) ^ ( a >> ( ( a % 8 )^ 3) ) ) ^ 5) % 8
+}
+
+fn find_patterns() -> HashMap<usize, Vec<u16>> {
+
+    let mut map: HashMap<usize, Vec<u16>> = HashMap::new();
+    for i in 0..((2 as u16).pow(10) as u16) {
+        let b = calculate(i);
+        if map.contains_key(&(b as usize)) {
+            let patterns = map.get_mut(&(b as usize)).unwrap();
+            patterns.push(i);
+        } else {
+            map.insert(b as usize, vec![i]);
+        }
+    }
+    return map;
+}
+
+
+
+
+
+
+
 fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) -> Option<usize> {
+   
+   
+    
+    let patterns = find_patterns();
+    // for (b, a) in patterns {
+    //     println!("\n\n{}:",b);
+    //     for ele in a {
+    //         println!("{:b}", ele)
+    //     }
+    // }
+
+   
     // //Assumption: Only one Print Statement
 
     // //Find Print statements
@@ -237,6 +279,9 @@ fn reverse_engineer(instructions: &mut Vec<Instr>, desired_output: &Vec<usize>) 
     // }
     None
 }
+
+
+//================================================ Main =========================================================
 fn main() {
 
     let path = String::from("input.txt");
